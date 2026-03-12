@@ -1,6 +1,6 @@
 # 校园二手交易平台 MVP
 
-邮箱 Magic Link 登录、发布闲置、站内消息、自动回复的校园二手交易网站。
+邮箱验证码（OTP）+ Magic Link 登录、发布闲置、站内消息、自动回复的校园二手交易网站。
 
 ## 技术栈
 
@@ -13,7 +13,7 @@
 
 | 功能         | 说明 |
 |--------------|------|
-| 登录注册     | 邮箱 Magic Link 一键登录，无需学号/微信 |
+| 登录注册     | 邮箱验证码（OTP）登录，附 Magic Link 备用，无需学号/微信 |
 | 发布商品     | 标题、描述、价格、1 张图片 |
 | 首页         | 商品卡片流，按时间排序 |
 | 搜索         | 按标题、描述 ilike 搜索 |
@@ -41,13 +41,22 @@ npm install
    - 设为 Public
    - 限制 5MB，允许 jpg/png/webp
 
-### 3. 邮箱 Magic Link 登录
+### 3. 邮箱登录（验证码 OTP + Magic Link）
 
 1. 进入 **Authentication → Providers → Email**
 2. 确认 **Enable Email provider** 已开启（默认开启）
-3. 在 **Authentication → URL Configuration** 中添加 Redirect URLs：
+3. 在 **Authentication → URL Configuration** 中添加 Redirect URLs（用于 Magic Link 回跳）：
    - 本地：`http://localhost:3000/auth/callback`
    - 生产：`https://你的域名/auth/callback`
+4. 在 **Authentication → Templates → Email** 中自定义邮件模板，让用户能看到验证码（OTP）：  
+   例如：
+   ```html
+   <h2>登录验证码</h2>
+   <p>请输入下面的 6 位验证码完成登录：</p>
+   <p style="font-size: 24px; letter-spacing: 0.3em;"><strong>{{ .Token }}</strong></p>
+   <p>如果不是你本人操作，可以忽略本邮件。</p>
+   ```
+   其中 `{{ .Token }}` 是 Supabase 提供的占位符，代表本次登录的 6 位验证码。也可以保留默认的 Magic Link 按钮，两种方式都能登录。
 
 ### 4. 环境变量
 
@@ -75,9 +84,21 @@ npm run dev
 
 ### 6. 验证登录
 
+**方式一：推荐的邮箱验证码（OTP）登录**
+
 1. 访问 http://localhost:3000/auth
-2. 输入邮箱，点击「发送登录链接」
-3. 收到邮件后点击链接，应跳转回首页且已登录
+2. 输入邮箱，点击「发送验证码（推荐）」按钮
+3. 打开邮箱，查看最新邮件中的 6 位验证码（模板中通过 `{{ .Token }}` 显示）
+4. 回到浏览器，在同一页面输入验证码并点击「登录」，应跳转回首页且已登录
+
+> 验证码邮件可以在任何设备/应用中查看（例如手机邮箱），再回到原浏览器输入即可登录，不要求“在同一浏览器打开链接”。
+
+**方式二：Magic Link 备用登录**
+
+1. 在 /auth 页输入邮箱后，点击「使用 Magic Link 登录」
+2. 打开邮箱，点击邮件中的 Magic Link
+3. 在**与访问 /auth 相同的浏览器中**打开链接（避免 localhost / 127.0.0.1 不一致导致 PKCE 报错）
+4. 回跳后应已登录
 
 ### 排查 /auth 登录问题（Failed to fetch 等）
 

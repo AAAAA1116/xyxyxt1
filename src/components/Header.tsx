@@ -6,18 +6,19 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 export function Header() {
-  const [user, setUser] = useState<{ id: string } | null>(null);
+  const [user, setUser] = useState<{ id: string; email?: string | null } | null>(null);
   const supabase = createClient();
   const router = useRouter();
 
   useEffect(() => {
     const getUser = async () => {
       const { data: { user: u } } = await supabase.auth.getUser();
-      setUser(u ? { id: u.id } : null);
+      setUser(u ? { id: u.id, email: u.email ?? null } : null);
     };
     getUser();
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => setUser(session?.user ? { id: session.user.id } : null)
+      (_event, session) =>
+        setUser(session?.user ? { id: session.user.id, email: session.user.email ?? null } : null)
     );
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
@@ -34,12 +35,15 @@ export function Header() {
         <Link href="/" className="text-lg font-semibold text-gray-900">
           校园二手
         </Link>
-        <nav className="flex items-center gap-3">
+        <nav className="flex items-center justify-end gap-3 flex-wrap">
           <Link href="/search" className="text-gray-600 hover:text-gray-900 text-sm">
             搜索
           </Link>
           {user ? (
             <>
+              <span className="text-xs text-gray-400 truncate max-w-[120px] sm:max-w-[200px]" title={`id: ${user.id}`}>
+                {user.email ?? user.id.slice(-8)}
+              </span>
               <Link href="/new" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
                 发布
               </Link>

@@ -36,6 +36,7 @@ export default async function ListingDetailPage({
 
   const sellerProfile = (listing as Record<string, unknown>).profiles as { nickname?: string } | null;
   const displayName = sellerProfile?.nickname || "卖家";
+  const sellerIdTail = String(listing.seller_id).slice(-6);
 
   return (
     <div className="max-w-lg mx-auto px-4 py-6">
@@ -55,6 +56,9 @@ export default async function ListingDetailPage({
           <p className="text-2xl font-bold text-indigo-600 mt-1">¥{listing.price}</p>
           <p className="text-sm text-gray-500 mt-2">
             发布者 {displayName} · {formatTime(listing.created_at)}
+          </p>
+          <p className="text-xs text-gray-400 mt-1 font-mono">
+            [调试] 卖家 id 末6位：{sellerIdTail}
           </p>
           {listing.description && (
             <p className="mt-3 text-gray-700">{listing.description}</p>

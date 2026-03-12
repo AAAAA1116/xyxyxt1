@@ -19,7 +19,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "参数错误" }, { status: 400 });
   }
 
-  // 查询 listing 获取 seller_id、price
   const { data: listing, error: listingErr } = await supabase
     .from("listings")
     .select("seller_id, price")
@@ -30,19 +29,25 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "商品不存在" }, { status: 404 });
   }
 
-  const sellerId = listing.seller_id as string;
+  const seller_id = listing.seller_id as string;
   const price = listing.price as number;
+  const from_user = user.id;
+  const to_user = seller_id;
 
-  // 不能给自己发
-  if (user.id === sellerId) {
-    return NextResponse.json({ error: "不能给自己发消息" }, { status: 400 });
+  if (from_user === seller_id) {
+    console.log("[POST /api/messages]", { from_user, seller_id, to_user, listing_id });
+    return NextResponse.json(
+      { error: "cannot message yourself: listing seller_id equals current user" },
+      { status: 400 }
+    );
   }
 
-  // 插入用户消息（from=当前用户，to=卖家）
+  console.log("[POST /api/messages]", { from_user, seller_id, to_user, listing_id });
+
   const { error: insertErr } = await supabase.from("messages").insert({
     listing_id,
-    from_user: user.id,
-    to_user: sellerId,
+    from_user,
+    to_user,
     content: content.trim(),
     is_auto: false,
   });
@@ -51,13 +56,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: insertErr.message }, { status: 500 });
   }
 
-  // 检测关键词 → 自动回复（需 service role 绕过 RLS，以卖家身份插入）
   if (AUTO_REPLY_PATTERN.test(content.trim())) {
     const admin = createAdminClient();
     await admin.from("messages").insert({
       listing_id,
-      from_user: sellerId,
-      to_user: user.id,
+      from_user: seller_id,
+      to_user: from_user,
       content: `还卖哦，${price}元，校内自取~`,
       is_auto: true,
     });
