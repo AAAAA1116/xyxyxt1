@@ -23,6 +23,7 @@ export default async function ListingDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createServerSupabaseClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   const { data: listing, error } = await supabase
     .from("listings")
@@ -65,6 +66,11 @@ export default async function ListingDetailPage({
           )}
           {listing.description && (
             <p className="mt-3 text-gray-700">{listing.description}</p>
+          )}
+          {user?.id === listing.seller_id && (
+            <p className="mt-3">
+              <Link href={`/listing/${id}/edit`} className="text-indigo-600 hover:underline text-sm">编辑商品</Link>
+            </p>
           )}
         </div>
       </div>

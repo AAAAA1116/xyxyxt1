@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { ListingCard } from "@/components/ListingCard";
+import { MyListingCard } from "@/components/MyListingCard";
 
 export default async function MePage() {
   const supabase = await createServerSupabaseClient();
@@ -61,7 +61,7 @@ export default async function MePage() {
 
       <div className="grid grid-cols-2 gap-3">
         {(listings ?? []).map((l: Record<string, unknown>) => (
-          <ListingCard key={String(l.id)} listing={l as never} />
+          <MyListingCard key={String(l.id)} listing={l as never} />
         ))}
       </div>
 
