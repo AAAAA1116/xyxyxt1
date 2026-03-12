@@ -30,15 +30,28 @@ export default async function MePage() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">我的发布</h1>
-
-      {(nickname || studentId) && (
-        <p className="mb-4 text-sm text-gray-600">
-          {nickname && <span>昵称：{nickname}</span>}
-          {nickname && studentId && " · "}
-          {studentId && <span>学号：{studentId}</span>}
+      <section className="mb-6 p-4 bg-white rounded-lg border border-gray-200">
+        <h2 className="text-sm font-medium text-gray-500 mb-3">我的资料</h2>
+        <dl className="space-y-2 text-sm">
+          <div>
+            <dt className="text-gray-500">邮箱</dt>
+            <dd className="text-gray-900">{user.email ?? "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">昵称</dt>
+            <dd className="text-gray-900">{nickname || "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-gray-500">学号</dt>
+            <dd className="text-gray-900">{studentId || "—"}</dd>
+          </div>
+        </dl>
+        <p className="mt-3">
+          <Link href="/me/edit" className="text-indigo-600 hover:underline text-sm">编辑资料</Link>
         </p>
-      )}
+      </section>
+
+      <h1 className="text-xl font-semibold text-gray-900 mb-4">我的发布</h1>
 
       {process.env.NODE_ENV === "development" && (
         <p className="mb-4 text-xs text-gray-500 font-mono">

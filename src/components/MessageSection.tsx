@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -16,28 +16,31 @@ export function MessageSection({ listingId, sellerId }: { listingId: string; sel
   const router = useRouter();
   const bottomRef = useRef<HTMLDivElement>(null);
 
+  const fetchMessages = useCallback(async () => {
+    const { data } = await supabase
+      .from("messages")
+      .select("id, listing_id, from_user, to_user, content, created_at, is_auto")
+      .eq("listing_id", listingId)
+      .order("created_at", { ascending: true });
+    setMessages((data ?? []) as Message[]);
+  }, [listingId, supabase]);
+
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user: u } } = await supabase.auth.getUser();
-      setUser(u ? { id: u.id } : null);
+      try {
+        const { data: { user: u } } = await supabase.auth.getUser();
+        setUser(u ? { id: u.id } : null);
+      } catch (e) {
+        if (e instanceof Error && e.name === "AbortError") return;
+        setUser(null);
+      }
     };
     getUser();
   }, [supabase.auth]);
 
   useEffect(() => {
     if (!user) return;
-
-    const fetchMessages = async () => {
-      const { data } = await supabase
-        .from("messages")
-        .select("id, listing_id, from_user, to_user, content, created_at, is_auto")
-        .eq("listing_id", listingId)
-        .order("created_at", { ascending: true });
-      setMessages((data ?? []) as Message[]);
-    };
-
     fetchMessages();
-
     const channel = supabase
       .channel(`messages:${listingId}`)
       .on(
@@ -46,11 +49,10 @@ export function MessageSection({ listingId, sellerId }: { listingId: string; sel
         () => fetchMessages()
       )
       .subscribe();
-
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [listingId, user, supabase]);
+  }, [listingId, user, supabase, fetchMessages]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -75,6 +77,7 @@ export function MessageSection({ listingId, sellerId }: { listingId: string; sel
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "发送失败");
       setContent("");
+      await fetchMessages();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "发送失败");
     } finally {
