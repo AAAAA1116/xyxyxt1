@@ -26,7 +26,7 @@ export function EditListingForm({
   const [price, setPrice] = useState(initialPrice);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState<"sold" | "delete" | null>(null);
+  const [actionLoading, setActionLoading] = useState<"sold" | "relist" | "delete" | null>(null);
   const [error, setError] = useState("");
   const [status, setStatus] = useState(initialStatus);
 
@@ -112,6 +112,25 @@ export function EditListingForm({
     }
   };
 
+  const markActive = async () => {
+    setActionLoading("relist");
+    setError("");
+    try {
+      const res = await fetch(`/api/listings/${listingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "active" }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "操作失败");
+      router.push("/");
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "上架失败");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const deleteListing = async () => {
     if (!confirm("确定删除该商品？删除后无法恢复。")) return;
     setActionLoading("delete");
@@ -181,7 +200,7 @@ export function EditListingForm({
         >
           {loading ? "保存中..." : "保存"}
         </button>
-        {status === "active" && (
+        {status === "active" ? (
           <button
             type="button"
             onClick={markSold}
@@ -189,6 +208,15 @@ export function EditListingForm({
             className="px-4 py-3 bg-amber-100 text-amber-800 rounded-lg font-medium hover:bg-amber-200 disabled:opacity-50"
           >
             {actionLoading === "sold" ? "处理中..." : "下架"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={markActive}
+            disabled={loading || actionLoading !== null}
+            className="px-4 py-3 bg-emerald-100 text-emerald-800 rounded-lg font-medium hover:bg-emerald-200 disabled:opacity-50"
+          >
+            {actionLoading === "relist" ? "处理中..." : "重新上架"}
           </button>
         )}
         <button

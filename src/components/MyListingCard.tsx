@@ -22,7 +22,7 @@ function formatRelativeTime(dateStr: string) {
 
 export function MyListingCard({ listing }: { listing: ListingWithProfile }) {
   const router = useRouter();
-  const [loading, setLoading] = useState<"sold" | "delete" | null>(null);
+  const [loading, setLoading] = useState<"sold" | "relist" | "delete" | null>(null);
   const isSold = listing.status === "sold";
 
   const markSold = async (e: React.MouseEvent) => {
@@ -36,6 +36,24 @@ export function MyListingCard({ listing }: { listing: ListingWithProfile }) {
         body: JSON.stringify({ status: "sold" }),
       });
       if (!res.ok) throw new Error((await res.json()).error || "操作失败");
+      router.refresh();
+    } catch (_) {
+      setLoading(null);
+    }
+  };
+
+  const markActive = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setLoading("relist");
+    try {
+      const res = await fetch(`/api/listings/${listing.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "active" }),
+      });
+      if (!res.ok) throw new Error((await res.json()).error || "操作失败");
+      router.push("/");
       router.refresh();
     } catch (_) {
       setLoading(null);
@@ -80,7 +98,7 @@ export function MyListingCard({ listing }: { listing: ListingWithProfile }) {
         </div>
       </Link>
       <div className="px-3 pb-3 flex flex-wrap gap-2">
-        {!isSold && (
+        {!isSold ? (
           <button
             type="button"
             onClick={markSold}
@@ -88,6 +106,15 @@ export function MyListingCard({ listing }: { listing: ListingWithProfile }) {
             className="text-xs px-2 py-1.5 bg-amber-100 text-amber-800 rounded hover:bg-amber-200 disabled:opacity-50"
           >
             {loading === "sold" ? "处理中..." : "下架"}
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={markActive}
+            disabled={loading !== null}
+            className="text-xs px-2 py-1.5 bg-emerald-100 text-emerald-800 rounded hover:bg-emerald-200 disabled:opacity-50"
+          >
+            {loading === "relist" ? "处理中..." : "重新上架"}
           </button>
         )}
         <Link
