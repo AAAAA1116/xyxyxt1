@@ -214,6 +214,10 @@ export function AuthForm() {
       if (err) throw err;
       setConnectionError("");
     } catch (e: unknown) {
+      if (e instanceof Error && e.name === "AbortError") {
+        setConnectionError("");
+        return;
+      }
       console.error("[AuthForm 连通性自检]", {
         name: e instanceof Error ? e.name : "unknown",
         message: e instanceof Error ? e.message : String(e),

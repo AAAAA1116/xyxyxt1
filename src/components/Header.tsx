@@ -12,13 +12,24 @@ export function Header() {
 
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user: u } } = await supabase.auth.getUser();
-      setUser(u ? { id: u.id, email: u.email ?? null } : null);
+      try {
+        const { data: { user: u } } = await supabase.auth.getUser();
+        setUser(u ? { id: u.id, email: u.email ?? null } : null);
+      } catch (e) {
+        if (e instanceof Error && e.name === "AbortError") return;
+        setUser(null);
+      }
     };
     getUser();
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) =>
-        setUser(session?.user ? { id: session.user.id, email: session.user.email ?? null } : null)
+      (_event, session) => {
+        try {
+          setUser(session?.user ? { id: session.user.id, email: session.user.email ?? null } : null);
+        } catch (e) {
+          if (e instanceof Error && e.name === "AbortError") return;
+          setUser(null);
+        }
+      }
     );
     return () => subscription.unsubscribe();
   }, [supabase.auth]);
