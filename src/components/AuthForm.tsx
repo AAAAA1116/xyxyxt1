@@ -43,6 +43,10 @@ export function AuthForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next") || "/";
+  const isRegister = searchParams.get("mode") === "register";
+
+  const [nickname, setNickname] = useState("");
+  const [studentId, setStudentId] = useState("");
 
   const urlError = searchParams.get("error");
 
@@ -173,7 +177,19 @@ export function AuthForm() {
         }
         return;
       }
-      // 登录成功
+      // 登录/注册成功：注册时顺带更新昵称、学号
+      if (isRegister && (nickname.trim() || studentId.trim())) {
+        try {
+          await fetch("/api/profile", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nickname: nickname.trim() || null,
+              student_id: studentId.trim() || null,
+            }),
+          });
+        } catch (_) {}
+      }
       setInfo("");
       router.push(next);
     } catch (e: unknown) {
@@ -231,7 +247,9 @@ export function AuthForm() {
 
   return (
     <div className="max-w-md mx-auto px-4 py-8">
-      <h1 className="text-xl font-semibold text-gray-900 mb-6">邮箱登录</h1>
+      <h1 className="text-xl font-semibold text-gray-900 mb-6">
+        {isRegister ? "注册" : "邮箱登录"}
+      </h1>
 
       {!configOk && (
         <div className="mb-4 p-4 bg-amber-50 border border-amber-300 rounded-lg text-sm text-amber-900">
@@ -262,6 +280,27 @@ export function AuthForm() {
         </div>
       )}
 
+      {isRegister && step === "request" && (
+        <>
+          <label className="block text-sm font-medium text-gray-700 mb-1">昵称（选填）</label>
+          <input
+            type="text"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            placeholder="显示给买家的称呼"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 mb-3"
+          />
+          <label className="block text-sm font-medium text-gray-700 mb-1">学号（选填）</label>
+          <input
+            type="text"
+            value={studentId}
+            onChange={(e) => setStudentId(e.target.value)}
+            placeholder="校内学号"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 mb-3"
+          />
+        </>
+      )}
+
       <label className="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
       <input
         type="email"
@@ -278,16 +317,18 @@ export function AuthForm() {
             disabled={loading || !configOk}
             className="mt-4 w-full py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50"
           >
-            {loading ? "发送中..." : "发送验证码（推荐）"}
+            {loading ? "发送中..." : isRegister ? "发送验证码" : "发送验证码（推荐）"}
           </button>
-          <button
-            type="button"
-            onClick={sendMagicLink}
-            disabled={loading || !configOk}
-            className="mt-2 w-full py-3 bg-white text-indigo-600 border border-indigo-200 rounded-lg text-sm hover:bg-indigo-50 disabled:opacity-50"
-          >
-            使用 Magic Link 登录（需要在同一浏览器打开链接）
-          </button>
+          {!isRegister && (
+            <button
+              type="button"
+              onClick={sendMagicLink}
+              disabled={loading || !configOk}
+              className="mt-2 w-full py-3 bg-white text-indigo-600 border border-indigo-200 rounded-lg text-sm hover:bg-indigo-50 disabled:opacity-50"
+            >
+              使用 Magic Link 登录（需要在同一浏览器打开链接）
+            </button>
+          )}
         </>
       )}
 
@@ -315,7 +356,7 @@ export function AuthForm() {
             disabled={loading || !configOk || otp.trim().length < 6}
             className="w-full py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:opacity-50"
           >
-            {loading ? "验证中..." : "登录"}
+            {loading ? "验证中..." : isRegister ? "完成注册" : "登录"}
           </button>
           <button
             type="button"
@@ -336,9 +377,13 @@ export function AuthForm() {
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
       <p className="mt-6 text-center text-sm text-gray-500">
-        <Link href="/" className="text-indigo-600 hover:underline">
-          返回首页
-        </Link>
+        {isRegister ? (
+          <Link href="/auth" className="text-indigo-600 hover:underline">已有账号？去登录</Link>
+        ) : (
+          <Link href="/auth?mode=register" className="text-indigo-600 hover:underline">没有账号？去注册</Link>
+        )}
+        {" · "}
+        <Link href="/" className="text-indigo-600 hover:underline">返回首页</Link>
       </p>
     </div>
   );

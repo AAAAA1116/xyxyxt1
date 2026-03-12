@@ -10,6 +10,12 @@ export default async function MePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth?next=/me");
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("nickname, student_id")
+    .eq("id", user.id)
+    .single();
+
   const { data: listings } = await supabase
     .from("listings")
     .select(`
@@ -19,9 +25,20 @@ export default async function MePage() {
     .eq("seller_id", user.id)
     .order("created_at", { ascending: false });
 
+  const nickname = (profile as { nickname?: string | null } | null)?.nickname;
+  const studentId = (profile as { student_id?: string | null } | null)?.student_id;
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
       <h1 className="text-xl font-semibold text-gray-900 mb-6">我的发布</h1>
+
+      {(nickname || studentId) && (
+        <p className="mb-4 text-sm text-gray-600">
+          {nickname && <span>昵称：{nickname}</span>}
+          {nickname && studentId && " · "}
+          {studentId && <span>学号：{studentId}</span>}
+        </p>
+      )}
 
       {process.env.NODE_ENV === "development" && (
         <p className="mb-4 text-xs text-gray-500 font-mono">
