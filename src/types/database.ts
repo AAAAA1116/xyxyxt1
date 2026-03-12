@@ -2,6 +2,7 @@ export type Profile = {
   id: string;
   nickname: string | null;
   phone: string | null;
+  student_id: string | null;
   created_at: string;
 };
 
