@@ -75,7 +75,7 @@ export default async function ListingDetailPage({
         </div>
       </div>
 
-      <div className="mt-6">
+      <div id="message" className="mt-6 scroll-mt-4">
         <MessageSection listingId={listing.id} sellerId={listing.seller_id} />
       </div>
 
