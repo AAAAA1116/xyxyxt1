@@ -59,6 +59,9 @@ export function Header() {
               <Link href="/new" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
                 发布
               </Link>
+              <Link href="/messages" className="text-gray-600 hover:text-gray-900 text-sm">
+                消息
+              </Link>
               <Link href="/me" className="text-gray-600 hover:text-gray-900 text-sm">
                 我的
               </Link>

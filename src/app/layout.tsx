@@ -16,6 +16,11 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <body className="font-sans antialiased min-h-screen bg-gray-50">
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.addEventListener("unhandledrejection",function(e){if(e.reason&&(e.reason.name==="AbortError"||(e.reason.message&&e.reason.message.includes("Lock broken")))){e.preventDefault();e.stopPropagation();}},true);`,
+          }}
+        />
         <SuppressAuthLockError />
         <Header />
         <main className="pb-20">{children}</main>
