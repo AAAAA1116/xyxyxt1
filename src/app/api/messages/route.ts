@@ -35,14 +35,18 @@ export async function POST(req: Request) {
   const to_user = seller_id;
 
   if (from_user === seller_id) {
-    console.log("[POST /api/messages]", { from_user, seller_id, to_user, listing_id });
+    if (process.env.NODE_ENV === "development") {
+      console.log("[POST /api/messages]", { from_user, seller_id, to_user, listing_id });
+    }
     return NextResponse.json(
-      { error: "cannot message yourself: listing seller_id equals current user" },
+      { error: "不能给自己发送消息（当前用户就是该商品的卖家）" },
       { status: 400 }
     );
   }
 
-  console.log("[POST /api/messages]", { from_user, seller_id, to_user, listing_id });
+  if (process.env.NODE_ENV === "development") {
+    console.log("[POST /api/messages]", { from_user, seller_id, to_user, listing_id });
+  }
 
   const { error: insertErr } = await supabase.from("messages").insert({
     listing_id,

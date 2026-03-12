@@ -30,7 +30,7 @@ export function MessageSection({ listingId, sellerId }: { listingId: string; sel
     const fetchMessages = async () => {
       const { data } = await supabase
         .from("messages")
-        .select("*")
+        .select("id, listing_id, from_user, to_user, content, created_at, is_auto")
         .eq("listing_id", listingId)
         .order("created_at", { ascending: true });
       setMessages((data ?? []) as Message[]);
@@ -75,7 +75,6 @@ export function MessageSection({ listingId, sellerId }: { listingId: string; sel
       const json = await res.json();
       if (!res.ok) throw new Error(json.error || "发送失败");
       setContent("");
-      router.refresh();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "发送失败");
     } finally {

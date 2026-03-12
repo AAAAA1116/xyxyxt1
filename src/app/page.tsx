@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-export const dynamic = "force-dynamic";
+/** 首页缓存 60 秒，减轻 Supabase 往返与冷启动 */
+export const revalidate = 60;
 import { ListingCard } from "@/components/ListingCard";
 import Link from "next/link";
 

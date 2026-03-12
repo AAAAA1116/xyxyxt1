@@ -176,7 +176,6 @@ export function AuthForm() {
       // 登录成功
       setInfo("");
       router.push(next);
-      router.refresh();
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("[AuthForm verifyOtp]", {

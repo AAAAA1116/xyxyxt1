@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
+/** 搜索结果缓存 30 秒 */
+export const revalidate = 30;
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { ListingCard } from "@/components/ListingCard";
 import { SearchForm } from "@/components/SearchForm";

@@ -26,7 +26,6 @@ export function Header() {
   const signOut = async () => {
     await supabase.auth.signOut();
     router.push("/");
-    router.refresh();
   };
 
   return (
@@ -41,9 +40,11 @@ export function Header() {
           </Link>
           {user ? (
             <>
-              <span className="text-xs text-gray-400 truncate max-w-[120px] sm:max-w-[200px]" title={`id: ${user.id}`}>
-                {user.email ?? user.id.slice(-8)}
-              </span>
+              {process.env.NODE_ENV === "development" && (
+                <span className="text-xs text-gray-400 truncate max-w-[120px] sm:max-w-[200px]" title={`id: ${user.id}`}>
+                  {user.email ?? user.id.slice(-8)}
+                </span>
+              )}
               <Link href="/new" className="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
                 发布
               </Link>

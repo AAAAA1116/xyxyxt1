@@ -23,9 +23,11 @@ export default async function MePage() {
     <div className="max-w-2xl mx-auto px-4 py-6">
       <h1 className="text-xl font-semibold text-gray-900 mb-6">我的发布</h1>
 
-      <p className="mb-4 text-xs text-gray-500 font-mono">
-        [调试] 当前登录：email={user.email ?? "(无)"} · id 末8位={user.id.slice(-8)}
-      </p>
+      {process.env.NODE_ENV === "development" && (
+        <p className="mb-4 text-xs text-gray-500 font-mono">
+          [调试] 当前登录：email={user.email ?? "(无)"} · id 末8位={user.id.slice(-8)}
+        </p>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         {(listings ?? []).map((l: Record<string, unknown>) => (

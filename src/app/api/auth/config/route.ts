@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 
+/** Edge 运行，冷启动更快，适合只读配置 */
+export const runtime = "edge";
+
 /**
  * 服务端读取 .env 并返回给 /auth 页面用，避免 Server Component 拿不到 process.env
  */

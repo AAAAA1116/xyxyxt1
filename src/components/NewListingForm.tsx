@@ -74,7 +74,6 @@ export function NewListingForm() {
       if (!res.ok) throw new Error(json.error || "发布失败");
 
       router.push(`/listing/${json.id}`);
-      router.refresh();
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "操作失败");
     } finally {

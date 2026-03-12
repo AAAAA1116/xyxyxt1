@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
+/** 商品详情缓存 60 秒 */
+export const revalidate = 60;
 import Image from "next/image";
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -57,9 +58,11 @@ export default async function ListingDetailPage({
           <p className="text-sm text-gray-500 mt-2">
             发布者 {displayName} · {formatTime(listing.created_at)}
           </p>
-          <p className="text-xs text-gray-400 mt-1 font-mono">
-            [调试] 卖家 id 末6位：{sellerIdTail}
-          </p>
+          {process.env.NODE_ENV === "development" && (
+            <p className="text-xs text-gray-400 mt-1 font-mono">
+              [调试] 卖家 id 末6位：{sellerIdTail}
+            </p>
+          )}
           {listing.description && (
             <p className="mt-3 text-gray-700">{listing.description}</p>
           )}
